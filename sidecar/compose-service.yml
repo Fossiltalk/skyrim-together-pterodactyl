@@ -1,0 +1,16 @@
+# Add under `services:` in /mnt/cache/appdata/pterodactyl/sidecars/docker-compose.yml
+# (uses the file's existing `x-ts` anchor), then: docker compose up -d skyrim
+  skyrim:
+    <<: *ts
+    container_name: skyrim-ts
+    hostname: skyrim
+    environment:
+      TS_STATE_DIR: /var/lib/tailscale
+      TS_USERSPACE: "false"
+      TS_HOSTNAME: skyrim
+      TS_AUTH_ONCE: "true"
+      TS_ACCEPT_DNS: "false"
+      GAME_PORT: "10578"
+    volumes:
+      - /mnt/cache/appdata/pterodactyl/sidecars/skyrim/state:/var/lib/tailscale
+      - /mnt/cache/appdata/pterodactyl/sidecars/fwd-skyrim.sh:/fwd.sh:ro

@@ -1,0 +1,59 @@
+name: Build yolk
+
+on:
+  push:
+    branches: [main]
+    paths: [Dockerfile, entrypoint.sh, .github/workflows/build.yml]
+  schedule:
+    - cron: "17 9 * * 1"   # Mondays, picks up the new upstream weekly build
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - upstream: latest          # current stable release
+            channel: stable
+          - upstream: weekly-latest   # rolling weekly build
+            channel: weekly
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read upstream version
+        id: ver
+        run: |
+          docker pull -q tiltedphoques/st-reborn-server:${{ matrix.upstream }}
+          v=$(docker image inspect tiltedphoques/st-reborn-server:${{ matrix.upstream }} \
+                --format '{{ index .Config.Labels "org.opencontainers.image.version" }}')
+          v=${v#v}
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+          echo "Upstream ${{ matrix.upstream }} = $v"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/amd64
+          build-args: |
+            ST_TAG=${{ matrix.upstream }}
+            ST_VERSION=${{ steps.ver.outputs.version }}
+          push: true
+          tags: |
+            ghcr.io/fossiltalk/st-reborn-yolk:${{ matrix.channel }}
+            ghcr.io/fossiltalk/st-reborn-yolk:${{ steps.ver.outputs.version }}
+          labels: |
+            org.opencontainers.image.version=${{ steps.ver.outputs.version }}

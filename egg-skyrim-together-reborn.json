@@ -1,0 +1,104 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED AUTOMATICALLY BY PTERODACTYL PANEL - PTERODACTYL.IO",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": "https://raw.githubusercontent.com/Fossiltalk/skyrim-together-pterodactyl/main/egg-skyrim-together-reborn.json"
+    },
+    "exported_at": "2026-11-19T20:41:53+00:00",
+    "name": "Skyrim Together Reborn",
+    "author": "fossiltalk@users.noreply.github.com",
+    "description": "Skyrim Together Reborn dedicated server, built on the official tiltedphoques/st-reborn-server image. Players need the same STR version as the server. UDP only (default 10578).",
+    "features": null,
+    "docker_images": {
+        "STR v1.8.4 (pinned)": "ghcr.io/fossiltalk/st-reborn-yolk:1.8.4",
+        "Stable (follows upstream latest)": "ghcr.io/fossiltalk/st-reborn-yolk:stable",
+        "Weekly (rolling dev build)": "ghcr.io/fossiltalk/st-reborn-yolk:weekly"
+    },
+    "file_denylist": [],
+    "startup": "/opt/stserver/SkyrimTogetherServer",
+    "config": {
+        "files": "{\n    \"config/STServer.ini\": {\n        \"parser\": \"ini\",\n        \"find\": {\n            \"GameServer.uPort\": \"{{server.build.default.port}}\",\n            \"GameServer.sServerName\": \"{{server.build.env.SERVER_NAME}}\",\n            \"GameServer.sPassword\": \"{{server.build.env.SERVER_PASSWORD}}\",\n            \"GameServer.sAdminPassword\": \"{{server.build.env.ADMIN_PASSWORD}}\",\n            \"GameServer.uMaxPlayerCount\": \"{{server.build.env.MAX_PLAYERS}}\",\n            \"LiveServices.bAnnounceServer\": \"false\",\n            \"ModPolicy.bEnableModCheck\": \"{{server.build.env.MOD_CHECK}}\",\n            \"Gameplay.bEnablePvp\": \"{{server.build.env.ENABLE_PVP}}\",\n            \"Gameplay.uDifficulty\": \"{{server.build.env.DIFFICULTY}}\"\n        }\n    }\n}",
+        "startup": "{\"done\": \"Server started, type /help\"}",
+        "logs": "{}",
+        "stop": "/quit"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\n# Server binaries ship in the yolk image; this only prepares the persistent folders.\nset -e\ncd /mnt/server\nmkdir -p config Data logs\ncat > Data/README.txt <<'TXT'\nSkyrim Together Reborn - Data folder\n\nMod check (Panel > Startup > \"Mod check\") makes the server refuse players whose\nmods don't match. When it is on, put your group's loadorder.txt here:\n\n    Data/loadorder.txt\n\nGet it from the host player's game: %LOCALAPPDATA%\\Skyrim Special Edition\\loadorder.txt\n(or from Mod Organizer 2's profile folder). Everyone must use the same STR version,\nmod list and load order.\nTXT\nchown -R 988:988 /mnt/server 2>/dev/null || true\necho \"Install done.\"\n",
+            "container": "ghcr.io/pterodactyl/installers:debian",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Server Name",
+            "description": "Name shown to players.",
+            "env_variable": "SERVER_NAME",
+            "default_value": "Skyrim Together",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Server Password",
+            "description": "Password players type to join. Also keeps the server off the public list. At least 8 characters.",
+            "env_variable": "SERVER_PASSWORD",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|min:8|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Admin Password",
+            "description": "Joining with this password gives admin rights. Panel admins only.",
+            "env_variable": "ADMIN_PASSWORD",
+            "default_value": "",
+            "user_viewable": false,
+            "user_editable": false,
+            "rules": "required|string|min:8|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Max Players",
+            "description": "Player cap. Going over 8 isn't recommended upstream.",
+            "env_variable": "MAX_PLAYERS",
+            "default_value": "8",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,32",
+            "field_type": "text"
+        },
+        {
+            "name": "Mod Check",
+            "description": "true = refuse players whose mods don't match Data/loadorder.txt.",
+            "env_variable": "MOD_CHECK",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "PvP",
+            "description": "true = players can damage each other.",
+            "env_variable": "ENABLE_PVP",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Difficulty",
+            "description": "0 Novice, 1 Apprentice, 2 Adept, 3 Expert, 4 Master, 5 Legendary.",
+            "env_variable": "DIFFICULTY",
+            "default_value": "4",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:0,5",
+            "field_type": "text"
+        }
+    ]
+}
