@@ -64,3 +64,5 @@ Back up `config/`, `Data/` (including `loadorder.txt`) and `logs/`. The server v
 2. From Nexus, install **Skyrim Together Reborn** (the same version as the server) and **Address Library for SKSE Plugins** (All-in-one, for 1.6.x).
 3. If mod check is on, use exactly the mod list and load order you were given.
 4. In game, open Skyrim Together, choose Direct Connect, and enter `skyrim:10578` (or the node's 100.x IP) and the server password.
+
+Tower's live node: `skyrim` = `100.81.222.117`. Connect to `100.81.222.117:10578`.
